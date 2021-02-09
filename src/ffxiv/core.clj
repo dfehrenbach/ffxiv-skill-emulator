@@ -60,7 +60,7 @@
              (close! acting-chan)
              (close! clean-up-chan)))
   (let [job   (job-switch base-config)
-        final (calc/rotation-director base-config job [:bh :dk])]
+        final (calc/rotation-director base-config job [:bh :dk :dk :dk :dk :tfc])]
     (pm/dump :main)
     (pm/spy>> :results
               {:pot    (:total-potency final)

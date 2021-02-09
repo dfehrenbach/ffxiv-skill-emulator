@@ -3,6 +3,8 @@
             [clojure.spec.alpha :as s]
             [ffxiv.jobs.monk.specs :as monk-specs]))
 
+;; TODO: Build in 5.4 changes
+
 ;;; effect
 (s/fdef set-stance
   :args (s/cat :stance :job-buffs/stance

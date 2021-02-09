@@ -30,9 +30,6 @@
         config))))
 
 (defn update-buff-ticks [buff tick-time job]
-  (pm/spy>> :penguin1 (job :skill-map))
-  (pm/spy>> :penguin2 (get-in (job :skill-map) [buff] :not-found))
-  (pm/spy>> :penguin3 (get-in (job :skill-map) [buff :tick-effects] :not-found))
   (fn [config]
     (let [duration        (get-in config [:timers :durations buff])
           ticks           (get-in config [:timers :ticks buff])
@@ -48,8 +45,7 @@
             (assoc-in [:timers :ticks buff] (dec ticks)))
         config))))
 
-;; TODO: Auto Attacks
-;; TODO: Timed Skill Effects (Brotherhood)
+;; TODO: Auto Attacks -- Maybe not if we just want raw potency
 (defn tick-down [config job skill]
   (let [tick-time         ((job :calculate-gcd) config skill)
         update-timers     (fn [timer-path]
@@ -76,6 +72,7 @@
   (println things-to-print)
   returnval)
 
+;; TODO: Move "NOT APPLIED" into some error area in the response
 (defn skill-director [config job skill]
   (let [allowed?          (or (every? true? (map #(% config) (:restrictions skill))) (empty? (:restrictions skill)))
         initial-config    (-> config

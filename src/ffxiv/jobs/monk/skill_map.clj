@@ -1,6 +1,7 @@
 (ns ffxiv.jobs.monk.skill-map
   (:require [ffxiv.jobs.monk.skill-effects :as effect]))
 
+;; TODO: Build in 5.4 changes
 (def skill-map {:boot          {:name                "Bootshine"
                                 :time                2.5
                                 :type                :gcd
