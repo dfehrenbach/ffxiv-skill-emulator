@@ -67,7 +67,6 @@
                :time   (:time-elapsed final)
                :stance (-> final :job-buffs :stance)
                :pps    (/ (:total-potency final) (if (zero? (:time-elapsed final)) 1 (:time-elapsed final)))
-               :gl     (-> final :job-buffs :gl)
                :bh     {:dur    (-> final :timers :durations :bh)
                         :cd     (-> final :timers :cooldowns :bh)
                         :ticks  (-> final :timers :ticks :bh)

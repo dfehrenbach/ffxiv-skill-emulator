@@ -28,10 +28,10 @@
 (s/def :cd/rof (s/double-in :min 0 :max 90))
 (s/def :cd/bh (s/double-in :min 0 :max 90))
 (s/def :cd/roe (s/double-in :min 0 :max 80))
-(s/def :cd/pb (s/double-in :min 0 :max 120))
+(s/def :cd/pb (s/double-in :min 0 :max 90))
 (s/def :cd/elixir (s/double-in :min 0 :max 30))
 (s/def :cd/shoulder-tackle (s/double-in :min 0 :max 30))
-(s/def :cd/tk (s/double-in :min 0 :max 10))
+(s/def :cd/tk (s/double-in :min 0 :max 45))
 (s/def :cd/anatman (s/double-in :min 0 :max 60))
 (s/def :cd/stance (s/double-in :min 0 :max 5))
 (s/def :timers/cooldowns (s/keys :req-un [:cd/rof

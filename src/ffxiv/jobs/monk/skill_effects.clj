@@ -4,7 +4,7 @@
             [ffxiv.jobs.monk.specs :as monk-specs]))
 
 ;; TODO: Build in 5.4 changes
-
+;; TODO: Form Shift should not leave you :formless
 ;;; effect
 (s/fdef set-stance
   :args (s/cat :stance :job-buffs/stance
@@ -37,15 +37,25 @@
 (s/fdef rotate-form
   :args (s/cat :config ::monk-specs/config)
   :ret ::monk-specs/config)
-(defn rotate-form [config] ;; Error?
+(defn rotate-form [config]
   (let [form (-> config :job-buffs :form)]
-    (if (pos? (-> config :timers :durations :pb)) (assoc-in config [:job-buffs :form] :pb)
-        (cond
-          (= form :formless) (assoc-in config [:job-buffs :form] :opo)
-          (= form :opo)      (assoc-in config [:job-buffs :form] :raptor)
-          (= form :raptor)   (assoc-in config [:job-buffs :form] :coeurl)
-          (= form :coeurl)   (assoc-in config [:job-buffs :form] :opo)
-          :else              (assoc-in config [:job-buffs :form] :opo)))))
+    (if (and (pos? (-> config :timers :durations :pb)) (pos? (-> config :charges :pb)))
+      (-> config
+          (assoc-in [:job-buffs :form] :pb)
+          (update-in [:charges :pb] dec))
+      (cond
+        (= form :formless) (assoc-in config [:job-buffs :form] :opo)
+        (= form :pb)       (assoc-in config [:job-buffs :form] :opo)
+        (= form :opo)      (assoc-in config [:job-buffs :form] :raptor)
+        (= form :raptor)   (assoc-in config [:job-buffs :form] :coeurl)
+        (= form :coeurl)   (assoc-in config [:job-buffs :form] :opo)
+        :else              (assoc-in config [:job-buffs :form] :opo)))))
+
+(s/fdef reset-form-duration
+  :args (s/cat :config ::monk-specs/config)
+  :ret ::monk-specs/config)
+(defn reset-form-duration [config]
+  (assoc-in config [:timers :durations :form] 15.0))
 
 ;;; condition
 (s/fdef form-restriction
@@ -53,7 +63,8 @@
                :config ::monk-specs/config)
   :ret boolean?)
 (defn form-restriction [form config]
-  (if (pos? (-> config :timers :durations :pb)) true
+  (if (or (pos? (-> config :timers :durations :pb))
+          (pos? (-> config :timers :durations :formless-fist))) true
       (= form (-> config :job-buffs :form))))
 
 ;;; math
@@ -71,60 +82,11 @@
 (s/fdef formed-additive?
   :args (s/cat :skill keyword?
                :config ::monk-specs/config)
-  :ret (s/int-in 0 31))
+  :ret #{0 30})
 (defn formed-additive? [skill config]
   (cond
     (and (= skill :aotd) (= :opo (-> config :job-buffs :form))) 30
     :else                                                       0))
-
-;; GREASED LIGHTNING
-;;; effect
-(s/fdef drop-gl-stacks
-  :args (s/cat :config ::monk-specs/config)
-  :ret ::monk-specs/config)
-(defn drop-gl-stacks [config]
-  (assoc-in config [:job-buffs :gl] 0))
-
-;;; effect
-(s/fdef add-gl
-  :args (s/cat :config ::monk-specs/config)
-  :ret ::monk-specs/config)
-(defn add-gl [config] ;; Error?
-  (let [gl (-> config :job-buffs :gl)]
-    (if (< gl 4)
-      (update-in config [:job-buffs :gl] + 1)
-      config)))
-
-;;; effect
-(s/fdef reset-gl-timer
-  :args (s/cat :config ::monk-specs/config)
-  :ret ::monk-specs/config)
-(defn reset-gl-timer [config]
-  (assoc-in config [:timers :durations :gl] 16.0))
-
-;;; effect
-(s/fdef form-shift-gl
-  :args (s/cat :config ::monk-specs/config)
-  :ret ::monk-specs/config)
-(defn form-shift-gl [config]
-  (let [form (-> config :job-buffs :form)]
-    (if (or (= form :raptor) (pos? (-> config :timers :durations :pb)))
-      (reset-gl-timer config)
-      config)))
-
-;;; condition
-(s/fdef max-gl
-  :args (s/cat :config ::monk-specs/config)
-  :ret boolean?)
-(defn max-gl [config]
-  (let [gl     (-> config :job-buffs :gl)
-        stance (-> config :job-buffs :stance)]
-    (cond
-      (= stance :stanceless) (= gl 3)
-      (= stance :fire)       (= gl 3)
-      (= stance :earth)      (= gl 3)
-      (= stance :wind)       (= gl 4)
-      :else                  (= gl 3))))
 
 ;; MEDITATION
 ;;; effect
@@ -159,6 +121,16 @@
 (defn reset-twin-snakes [config]
   (assoc-in config [:timers :durations :twin] 15.0))
 
+;;; effect
+(s/fdef refresh-10-twin-snakes
+  :args (s/cat :config ::monk-specs/config)
+  :ret ::monk-specs/config)
+(defn refresh-10-twin-snakes [config]
+  (let [ts-duration (-> config :timers :durations :twin)
+        refreshed-duration (if (<= 15.0 (+ ts-duration 10)) 15.0
+                               (+ ts-duration 10))]
+    (assoc-in config [:timers :durations :twin] refreshed-duration)))
+
 ;; DEMOLISH
 ;;; effect
 (s/fdef reset-demolish
@@ -192,9 +164,9 @@
 ;;; condition
 (s/fdef leaden?
   :args (s/cat :config ::monk-specs/config)
-  :ret #{0 150})
+  :ret #{0 170})
 (defn leaden? [config]
-  (if (-> config :job-buffs :leaden) 150 0))
+  (if (-> config :job-buffs :leaden) 170 0))
 
 ;; SHOULDER TACKLE
 ;;; effect
@@ -238,6 +210,13 @@
   (zero? (-> config :timers :cooldowns :elixir)))
 
 ;; TORNADO KICK
+;;; effect
+(s/fdef reset-tk-cd
+  :args (s/cat :config ::monk-specs/config)
+  :ret ::monk-specs/config)
+(defn reset-tk-cd [config]
+  (assoc-in config [:timers :cooldowns :tk] 45.0))
+
 ;;; condition
 (s/fdef tk-avilable
   :args (s/cat :config ::monk-specs/config)
@@ -252,8 +231,9 @@
   :ret ::monk-specs/config)
 (defn reset-pb [config]
   (-> config
-      (assoc-in [:timers :cooldowns :pb] 120.0)
-      (assoc-in [:timers :durations :pb] 10.0)))
+      (assoc-in [:timers :cooldowns :pb] 90.0)
+      (assoc-in [:timers :durations :pb] 15.0)
+      (assoc-in [:charges :pb] 6)))
 
 ;;; condition
 (s/fdef pb-available
@@ -262,7 +242,7 @@
 (defn pb-available [config]
   (zero? (-> config :timers :cooldowns :pb)))
 
-;; RING OF FIRE
+;; RIDDLE OF FIRE
 ;;; effect
 (s/fdef reset-rof
   :args (s/cat :config ::monk-specs/config)
@@ -311,6 +291,23 @@
   :ret boolean?)
 (defn anatman-available [config]
   (zero? (-> config :timers :cooldowns :anatman)))
+
+;; FORM SHIFT
+;;; effect
+(s/fdef set-formless-fist
+  :args (s/cat :config ::monk-specs/config)
+  :ret ::monk-specs/config)
+(defn set-formless-fist [config]
+  (-> config
+      (assoc-in [:timers :durations :form] 15.0)
+      (assoc-in [:timers :durations :formless-fist] 15.0)))
+
+;;; effect
+(s/fdef unset-formless-fist
+  :args (s/cat :config ::monk-specs/config)
+  :ret ::monk-specs/config)
+(defn unset-formless-fist [config]
+  (assoc-in config [:timers :durations :formless-fist] 0))
 
 (comment
 

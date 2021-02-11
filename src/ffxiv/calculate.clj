@@ -1,8 +1,5 @@
 (ns ffxiv.calculate
-  (:require [ffxiv.jobs.monk.monk :refer [monk]]
-            [postmortem.core :as pm]
-            [postmortem.instrument :as pi]
-            [postmortem.xforms :as pxf]))
+  (:require [postmortem.core :as pm]))
 
 (defn update-timer [timer timer-path tick-time]
   (fn [config]
