@@ -34,23 +34,27 @@
 
 ;; FORMS
 ;;; effect
-;;; TODO: Send in form and use with partial function to give better workings of :opo
 (s/fdef rotate-form
-  :args (s/cat :config ::monk-specs/config)
+  :args (s/cat :form :job-buffs/form
+               :config ::monk-specs/config)
   :ret ::monk-specs/config)
-(defn rotate-form [config]
-  (let [form (-> config :job-buffs :form)]
-    (if (and (pos? (-> config :timers :durations :pb)) (pos? (-> config :charges :pb)))
+(defn rotate-form [form config]
+  (let [in-pb? (and (pos? (-> config :timers :durations :pb))
+                    (pos? (-> config :charges :pb))
+                    (= :pb (-> config :job-buffs :form)))]
+    (if in-pb?
+      (if (zero? (dec (get-in config [:charges :pb]))) ;; if charges GOING to be zero, make our form :formless, remove remaining duration, and dec to 0
+        (-> config
+            (assoc-in [:job-buffs :form] :formless)
+            (assoc-in [:timers :durations :pb] 0.0)
+            (update-in [:charges :pb] dec))
+        (-> config ;; else, keep our form as :pb, this is automatic, but writing in anyways, and dec charges
+            (assoc-in [:job-buffs :form] :pb)
+            (update-in [:charges :pb] dec)
+            (assoc-in [:timers :durations :form] 15.0)))
       (-> config
-          (assoc-in [:job-buffs :form] :pb)
-          (update-in [:charges :pb] dec))
-      (cond
-        (= form :formless) (assoc-in config [:job-buffs :form] :raptor)
-        (= form :pb)       (assoc-in config [:job-buffs :form] :raptor)
-        (= form :opo)      (assoc-in config [:job-buffs :form] :raptor)
-        (= form :raptor)   (assoc-in config [:job-buffs :form] :coeurl)
-        (= form :coeurl)   (assoc-in config [:job-buffs :form] :opo)
-        :else              (assoc-in config [:job-buffs :form] :raptor)))))
+          (assoc-in [:job-buffs :form] form)
+          (assoc-in [:timers :durations :form] 15.0)))))
 
 (s/fdef reset-form-duration
   :args (s/cat :config ::monk-specs/config)
@@ -74,10 +78,13 @@
                :config ::monk-specs/config)
   :ret (s/double-in :min 1 :max 3))
 (defn formed-multiplier? [skill config]
-  (let [crit-damage-mult 1.6]
+  (let [crit-damage-mult 1.6
+        form (-> config :job-buffs :form)]
     (cond
-      (and (= skill :boot) (= :opo (-> config :job-buffs :form))) crit-damage-mult
-      :else                                                       1.0)))
+      (and (= skill :boot)
+           (or (= :opo form)
+               (pos? (-> config :timers :durations :formless-fist)))) crit-damage-mult
+      :else 1.0)))
 
 ;;; math
 (s/fdef formed-additive?
@@ -149,9 +156,13 @@
   :args (s/cat :config ::monk-specs/config)
   :ret ::monk-specs/config)
 (defn grant-leaden [config]
-  (-> config
-      (assoc-in [:job-buffs :leaden] true)
-      (assoc-in [:timers :durations :leaden] 30.0)))
+  (let [form (-> config :job-buffs :form)]
+    (if (or (= :opo form)
+            (pos? (-> config :timers :durations :formless-fist)))
+      (-> config
+          (assoc-in [:job-buffs :leaden] true)
+          (assoc-in [:timers :durations :leaden] 30.0))
+      config)))
 
 ;;; effect
 (s/fdef use-leaden
@@ -309,7 +320,7 @@
   :args (s/cat :config ::monk-specs/config)
   :ret ::monk-specs/config)
 (defn unset-formless-fist [config]
-  (assoc-in config [:timers :durations :formless-fist] 0))
+  (assoc-in config [:timers :durations :formless-fist] 0.0))
 
 (comment
 

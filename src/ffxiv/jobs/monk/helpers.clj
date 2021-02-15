@@ -11,7 +11,7 @@
         twin-mult (if (< 0 (-> config :timers :durations :twin)) 1.1 1)
         rof-mult (if (< 0 (-> config :timers :durations :rof)) 1.25 1)
         bh-mult (if (< 0 (-> config :timers :durations :bh)) 1.05 1)]
-    (reduce * 1 [stance-mult twin-mult rof-mult bh-mult])))
+    (reduce * 1.0 [stance-mult twin-mult rof-mult bh-mult])))
 
 (s/fdef calculate-potency
   :args (s/cat :config ::monk-specs/config
@@ -28,7 +28,7 @@
   :args (s/cat :config ::monk-specs/config
                :skill ::core-specs/skill)
   :ret (s/or :zero zero? :double double?))
-(defn calculate-gcd [config skill]
+(defn calculate-gcd [_config skill]
   (let [base-gcd 2.4
         gl-mult 0.8
         new-gcd (* gl-mult base-gcd)]

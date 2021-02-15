@@ -4,7 +4,7 @@
 ;; TODO: Build in 5.4 changes
 ;; TODO: Add in Mantra
 ;; TODO: Add in Riddle of Earth
-;; TODO: Refactor to include CD time HERE instead of in the config. Make healpert to construct config with values
+;; TODO: Refactor to include CD time HERE instead of in the config. Make healper to construct config with values
 ;; TODO: Add in level requirements
 ;; TODO: Add in a "wait"
 ;; TODO: Allow the ability to "Hold" a skill (Anatman)
@@ -14,7 +14,7 @@
                                 :potency             200
                                 :potency-additives   [effect/leaden?]
                                 :potency-multipliers [(partial effect/formed-multiplier? :boot)]
-                                :effects             [effect/rotate-form
+                                :effects             [(partial effect/rotate-form :raptor)
                                                       effect/reset-form-duration
                                                       effect/unset-formless-fist
                                                       effect/use-leaden]
@@ -23,7 +23,7 @@
                                 :time         2.5
                                 :type         :gcd
                                 :potency      300
-                                :effects      [effect/rotate-form
+                                :effects      [(partial effect/rotate-form :coeurl)
                                                effect/reset-form-duration
                                                effect/unset-formless-fist]
                                 :restrictions [(partial effect/form-restriction :raptor)]}
@@ -31,7 +31,7 @@
                                 :time         2.5
                                 :type         :gcd
                                 :potency      300
-                                :effects      [effect/rotate-form
+                                :effects      [(:partial effect/rotate-form :opo)
                                                effect/reset-form-duration
                                                effect/unset-formless-fist]
                                 :restrictions [(partial effect/form-restriction :coeurl)]}
@@ -39,7 +39,7 @@
                                 :time         2.5
                                 :type         :gcd
                                 :potency      200
-                                :effects      [effect/rotate-form
+                                :effects      [(partial effect/rotate-form :raptor)
                                                effect/reset-form-duration
                                                effect/unset-formless-fist
                                                effect/grant-leaden]
@@ -48,7 +48,7 @@
                                 :time         2.5
                                 :type         :gcd
                                 :potency      260
-                                :effects      [effect/rotate-form
+                                :effects      [(partial effect/rotate-form :coeurl)
                                                effect/reset-form-duration
                                                effect/unset-formless-fist
                                                effect/reset-twin-snakes]
@@ -58,7 +58,7 @@
                                 :type         :gcd
                                 :potency      110
                                 :tick-potency 80
-                                :effects      [effect/rotate-form
+                                :effects      [(partial effect/rotate-form :opo)
                                                effect/reset-form-duration
                                                effect/unset-formless-fist
                                                effect/reset-demolish]
@@ -105,7 +105,7 @@
                                 :type              :gcd
                                 :potency           110
                                 :potency-additives [(partial effect/formed-additive? :aotd)]
-                                :effects           [effect/rotate-form
+                                :effects           [(partial effect/rotate-form :raptor)
                                                     effect/reset-form-duration
                                                     effect/unset-formless-fist]
                                 :restrictions      []}
@@ -113,7 +113,7 @@
                                 :time         2.5
                                 :type         :gcd
                                 :potency      140
-                                :effects      [effect/rotate-form
+                                :effects      [(partial effect/rotate-form :coeurl)
                                                effect/reset-form-duration
                                                effect/unset-formless-fist
                                                effect/refresh-10-twin-snakes]
@@ -122,7 +122,7 @@
                                 :time         2.5
                                 :type         :gcd
                                 :potency      150
-                                :effects      [effect/rotate-form
+                                :effects      [(partial effect/rotate-form :opo)
                                                effect/reset-form-duration
                                                effect/unset-formless-fist]
                                 :restrictions [(partial effect/form-restriction :coeurl)]}
@@ -151,7 +151,8 @@
                                 :time         0.5
                                 :type         :ogcd
                                 :potency      0
-                                :effects      [effect/reset-pb]
+                                :effects      [(partial effect/rotate-form :pb)
+                                               effect/reset-pb]
                                 :restrictions [effect/pb-available]}
                 :form-shift    {:name         "Form Shift"
                                 :time         2.5

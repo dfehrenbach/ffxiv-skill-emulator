@@ -11,18 +11,18 @@
 ;; JOB-BUFFS
 (s/def :job-buffs/form #{:formless :opo :raptor :coeurl :pb})
 (s/def :job-buffs/stance #{:stanceless :fire :wind :earth})
-(s/def :job-buffs/gl (s/int-in 0 5)) ;; DISCRETE
 (s/def :job-buffs/meditation (s/int-in 0 6)) ;; DISCRETE
 (s/def :job-buffs/leaden boolean?)
 (s/def ::job-buffs (s/keys :req-un [:job-buffs/form
                                     :job-buffs/stance
-                                    :job-buffs/gl
                                     :job-buffs/meditation
                                     :job-buffs/leaden]))
 
 ;; CHARGES
 (s/def :charges/shoulder-tackle (s/int-in 0 3)) ;; DISCRETE
-(s/def ::charges (s/keys :req-un [:charges/shoulder-tackle]))
+(s/def :charges/pb (s/int-in 0 7)) ;; DISCRETE
+(s/def ::charges (s/keys :req-un [:charges/shoulder-tackle
+                                  :charges/pb]))
 
 ;; TIMERS - COOLDOWNS
 (s/def :cd/rof (s/double-in :min 0 :max 90))
@@ -45,20 +45,22 @@
                                           :cd/stance]))
 
 ;; TIMERS - DURATION
-(s/def :dur/gl (s/double-in :min 0 :max 16))
 (s/def :dur/leaden (s/double-in :min 0 :max 30))
 (s/def :dur/twin (s/double-in :min 0 :max 15))
 (s/def :dur/rof (s/double-in :min 0 :max 20))
 (s/def :dur/bh (s/double-in :min 0 :max 15))
 (s/def :dur/roe (s/double-in :min 0 :max 30))
-(s/def :dur/pb (s/double-in :min 0 :max 10))
-(s/def :timers/durations (s/keys :req-un [:dur/gl
-                                          :dur/leaden
+(s/def :dur/pb (s/double-in :min 0 :max 15))
+(s/def :dur/form (s/double-in :min 0 :max 15))
+(s/def :dur/formless-fist (s/double-in :min 0 :max 15))
+(s/def :timers/durations (s/keys :req-un [:dur/leaden
                                           :dur/twin
                                           :dur/rof
                                           :dur/bh
                                           :dur/roe
-                                          :dur/pb]))
+                                          :dur/pb
+                                          :dur/form
+                                          :dur/formless-fist]))
 
 ;; TIMERS
 (s/def ::timers (s/keys :req-un [:timers/cooldowns
