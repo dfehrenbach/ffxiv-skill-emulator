@@ -60,19 +60,21 @@
              (close! acting-chan)
              (close! clean-up-chan)))
   (let [job   (job-switch base-config)
-        final (calc/rotation-director base-config job [:bh :dk :dk :dk :dk :tfc])]
+        final (calc/rotation-director base-config job [:dk :pb])]
     (pm/dump :main)
     (pm/spy>> :results
               {:pot    (:total-potency final)
                :time   (:time-elapsed final)
                :stance (-> final :job-buffs :stance)
+               :form   (-> final :job-buffs :form)
                :pps    (/ (:total-potency final) (if (zero? (:time-elapsed final)) 1 (:time-elapsed final)))
                :bh     {:dur    (-> final :timers :durations :bh)
                         :cd     (-> final :timers :cooldowns :bh)
                         :ticks  (-> final :timers :ticks :bh)
                         :stacks (-> final :job-buffs :meditation)}
-               :pb     {:dur (-> final :timers :durations :pb)
-                        :cd  (-> final :timers :cooldowns :pb)}})))
+               :pb     {:dur  (-> final :timers :durations :pb)
+                        :cd   (-> final :timers :cooldowns :pb)
+                        :uses (-> final :charges :pb)}})))
 
 (comment
   (-main)

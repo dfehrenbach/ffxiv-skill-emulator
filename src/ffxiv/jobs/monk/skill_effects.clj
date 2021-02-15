@@ -34,6 +34,7 @@
 
 ;; FORMS
 ;;; effect
+;;; TODO: Send in form and use with partial function to give better workings of :opo
 (s/fdef rotate-form
   :args (s/cat :config ::monk-specs/config)
   :ret ::monk-specs/config)
@@ -44,12 +45,12 @@
           (assoc-in [:job-buffs :form] :pb)
           (update-in [:charges :pb] dec))
       (cond
-        (= form :formless) (assoc-in config [:job-buffs :form] :opo)
-        (= form :pb)       (assoc-in config [:job-buffs :form] :opo)
+        (= form :formless) (assoc-in config [:job-buffs :form] :raptor)
+        (= form :pb)       (assoc-in config [:job-buffs :form] :raptor)
         (= form :opo)      (assoc-in config [:job-buffs :form] :raptor)
         (= form :raptor)   (assoc-in config [:job-buffs :form] :coeurl)
         (= form :coeurl)   (assoc-in config [:job-buffs :form] :opo)
-        :else              (assoc-in config [:job-buffs :form] :opo)))))
+        :else              (assoc-in config [:job-buffs :form] :raptor)))))
 
 (s/fdef reset-form-duration
   :args (s/cat :config ::monk-specs/config)
@@ -226,6 +227,7 @@
 
 ;; PERFECT BALANCE
 ;;; effect
+;;; TODO: PB Should set form to :pb
 (s/fdef reset-pb
   :args (s/cat :config ::monk-specs/config)
   :ret ::monk-specs/config)
